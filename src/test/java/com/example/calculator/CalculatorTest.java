@@ -115,3 +115,4 @@ class CalculatorTest {
         assertThat(info).contains("Jenkins");
     }
 }
+
