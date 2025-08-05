@@ -6,7 +6,7 @@ runLintTests: true
 # Test Categories Configuration
 runSmokeTests: true
 runSanityTests: true
-runRegressionTests: false    # Set to true for full regression testing
+runRegressionTests: true    # Set to true for full regression testing
 
 tool_for_unit_testing:
   java: "junit"
