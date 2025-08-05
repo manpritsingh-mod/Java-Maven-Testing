@@ -3,10 +3,21 @@ project_language: "java-maven"
 runUnitTests: true
 runLintTests: true
 
+# Test Categories Configuration
+runSmokeTests: true
+runSanityTests: true
+runRegressionTests: false    # Set to true for full regression testing
+
 tool_for_unit_testing:
   java: "junit"
 tool_for_lint_testing:
   java: "checkstyle"
+
+# Test execution order and configuration
+test_execution:
+  smoke_tests_first: true
+  fail_fast: true           # Stop on first test failure
+  parallel_execution: false
 
 # Basic Notification Configuration
 notifications:
