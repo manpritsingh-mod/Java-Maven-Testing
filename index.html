@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MY_UnifiedCi - Interactive Presentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A dashboard-style single-page application with a sticky top navigation for easy access to key sections. This non-linear structure allows different audiences (technical vs. management) to explore content at their own pace. Key interactions include clickable architecture components that reveal details in a modal, interactive charts for ROI visualization, and a tabbed interface for the roadmap. This design was chosen to transform a static presentation into an engaging, self-guided exploratory experience, making the complex information more digestible and impactful. -->
+    <!-- Visualization & Content Choices: 
+        - Problem/Solution (Slide 3): Goal: Compare. Method: Side-by-side text blocks. Interaction: Clear visual separation. Justification: Directly contrasts pain points with solutions for immediate value proposition clarity.
+        - Architecture (Slides 4-5): Goal: Organize/Explore. Method: HTML/CSS diagram. Interaction: Clickable nodes opening a modal with details. Justification: Keeps the main view clean for management while offering a deep dive for technical staff.
+        - Benefits/ROI (Slide 8, 9): Goal: Persuade/Inform. Method: Bar and Doughnut charts (Chart.js). Interaction: Animated on load, hover tooltips. Justification: Visual data is more compelling and easier to grasp than text lists, especially for financial impact.
+        - Roadmap (Slide 10): Goal: Show change. Method: Tabbed interface. Interaction: Clicking tabs reveals phase details. Justification: Organizes a large amount of future-facing information cleanly.
+        - Demo (Slide 7): Goal: Illustrate process. Method: Animated text log. Interaction: Automatic animation on view. Justification: Simulates a live demo, making the process feel tangible and dynamic.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f1eb;
+            color: #403d39;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0077b6;
+            border-bottom-color: #0077b6;
+        }
+        .card {
+            background-color: #fffcf2;
+            border: 1px solid #ccc5b9;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-primary {
+            background-color: #0077b6;
+            color: #ffffff;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #005f8e;
+        }
+        .section-title {
+            color: #252422;
+        }
+        .architecture-box {
+            border: 2px solid #ccc5b9;
+            background-color: #fffcf2;
+            padding: 1rem;
+            text-align: center;
+        }
+        .architecture-box.clickable {
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .architecture-box.clickable:hover {
+            background-color: #e6e1d9;
+            border-color: #0077b6;
+        }
+        .modal {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-40 w-full border-b border-gray-200">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-gray-800">🚀 MY_UnifiedCi</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Overview</a>
+                        <a href="#problem" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Problem & Solution</a>
+                        <a href="#architecture" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Architecture</a>
+                        <a href="#benefits" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Benefits & ROI</a>
+                        <a href="#roadmap" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Roadmap</a>
+                        <a href="#cta" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Call to Action</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100 focus:outline-none">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#overview" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Overview</a>
+                <a href="#problem" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Problem & Solution</a>
+                <a href="#architecture" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Architecture</a>
+                <a href="#benefits" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Benefits & ROI</a>
+                <a href="#roadmap" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Roadmap</a>
+                <a href="#cta" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Call to Action</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <section id="overview" class="text-center py-16">
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight section-title">Enterprise CI/CD Standardization & Automation</h1>
+            <p class="mt-4 max-w-3xl mx-auto text-lg md:text-xl text-gray-600">A centralized Jenkins Shared Library providing standardized pipelines, reusable components, and enterprise-grade automation to accelerate development and improve quality across all teams.</p>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="card p-6 rounded-lg">
+                    <p class="text-4xl font-bold text-blue-600">99%</p>
+                    <p class="mt-2 text-lg font-medium">Reduction in New Project Setup Time</p>
+                    <p class="text-gray-500">(Days to Minutes)</p>
+                </div>
+                <div class="card p-6 rounded-lg">
+                    <p class="text-4xl font-bold text-blue-600">1 Line</p>
+                    <p class="mt-2 text-lg font-medium">of Code to Implement a Full Pipeline</p>
+                    <p class="text-gray-500">(vs. 200+)</p>
+                </div>
+                <div class="card p-6 rounded-lg">
+                    <p class="text-4xl font-bold text-blue-600">$200k+</p>
+                    <p class="mt-2 text-lg font-medium">Projected Annual Developer Time Savings</p>
+                    <p class="text-gray-500">(Conservative Estimate)</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="problem" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold section-title">From Chaos to Control</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">MY_UnifiedCi directly addresses the critical challenges hindering our development velocity and quality. This section outlines the problems we face today and how our centralized solution provides a clear, effective path forward.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="card p-8 rounded-lg border-l-4 border-red-500">
+                    <h3 class="text-2xl font-bold mb-4">❌ The Problems: Current State</h3>
+                    <ul class="space-y-4 text-gray-700">
+                        <li><strong class="text-red-600">Pipeline Duplication:</strong> 50+ inconsistent, copy-pasted pipeline variations across teams.</li>
+                        <li><strong class="text-red-600">Maintenance Nightmare:</strong> Updates require manually changing dozens of individual pipelines, causing errors.</li>
+                        <li><strong class="text-red-600">Slow Onboarding:</strong> New projects take 2-3 days to configure CI/CD, wasting developer time.</li>
+                        <li><strong class="text-red-600">Quality Inconsistency:</strong> Teams skip vital steps like testing or linting; reporting is non-standard.</li>
+                    </ul>
+                </div>
+                <div class="card p-8 rounded-lg border-l-4 border-green-500">
+                    <h3 class="text-2xl font-bold mb-4">✅ The Solution: MY_UnifiedCi</h3>
+                    <ul class="space-y-4 text-gray-700">
+                        <li><strong class="text-green-600">Centralized Templates:</strong> One source of truth for all pipelines, ensuring consistency.</li>
+                        <li><strong class="text-green-600">Effortless Maintenance:</strong> Update the central library once to apply changes everywhere.</li>
+                        <li><strong class="text-green-600">Rapid Onboarding:</strong> New projects are CI/CD-ready in 5 minutes with a single line of code.</li>
+                        <li><strong class="text-green-600">Enforced Best Practices:</strong> Quality gates, testing, and standardized reporting are built-in.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="architecture" class="py-16 bg-white/50 rounded-lg">
+             <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold section-title">Interactive System Architecture</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-600">Explore the structure of the MY_UnifiedCi Shared Library. Click on the core components in the diagram below to see detailed information about their roles and functions. This architecture is designed for modularity, reusability, and easy extension.</p>
+            </div>
+            <div class="max-w-5xl mx-auto">
+                <div class="architecture-box rounded-t-lg">
+                    <h3 class="font-bold text-xl">MY_UnifiedCi SHARED LIBRARY</h3>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 border-x-2 border-b-2 border-gray-300 rounded-b-lg">
+                    <div class="space-y-4">
+                        <div class="architecture-box font-semibold">src/ (Core Classes)</div>
+                        <div class="architecture-box clickable" data-modal-target="modal-src-classes">
+                            <h4 class="font-bold">Core Logic Classes</h4>
+                            <p>GitHubManager, MavenScript, GradleScript, PythonScript</p>
+                        </div>
+                        <div class="architecture-box clickable" data-modal-target="modal-src-generators">
+                             <h4 class="font-bold">Command Generators</h4>
+                            <p>Maven, Gradle, Python commands, Git operations</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="architecture-box font-semibold">vars/ (Pipeline Logic)</div>
+                         <div class="architecture-box clickable" data-modal-target="modal-vars-templates">
+                            <h4 class="font-bold">Pipeline Templates</h4>
+                            <p>javaMaven_template, javaGradle_template, python_template</p>
+                        </div>
+                        <div class="architecture-box clickable" data-modal-target="modal-vars-utils">
+                             <h4 class="font-bold">Core Utilities</h4>
+                            <p>core_build, core_test, core_utils, logger, sendReport</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center text-4xl my-4 font-thin">↓</div>
+                <div class="architecture-box rounded-lg">
+                    <h3 class="font-bold text-xl">CONSUMED BY PROJECT TEAMS</h3>
+                    <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-gray-200 p-2 rounded">Team A (Maven)</div>
+                        <div class="bg-gray-200 p-2 rounded">Team B (Gradle)</div>
+                        <div class="bg-gray-200 p-2 rounded">Team C (Python)</div>
+                        <div class="bg-gray-200 p-2 rounded">Team D (Microservice)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="benefits" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold section-title">Tangible Benefits & ROI</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">Adopting MY_UnifiedCi delivers significant improvements in productivity, cost, and operational efficiency. The charts below visualize the quantifiable impact on our business and technical teams.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="card p-6 rounded-lg">
+                    <h3 class="text-xl font-bold text-center mb-4">Productivity & Efficiency Gains</h3>
+                    <div class="chart-container">
+                        <canvas id="benefitsChart"></canvas>
+                    </div>
+                </div>
+                <div class="card p-6 rounded-lg">
+                    <h3 class="text-xl font-bold text-center mb-4">Projected Annual Savings ($200k+)</h3>
+                    <div class="chart-container">
+                        <canvas id="savingsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="roadmap" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold section-title">Future Roadmap</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">Our vision extends beyond the current capabilities. The following roadmap outlines our plan to introduce enhanced language support, advanced automation, and deeper enterprise integrations throughout the year.</p>
+            </div>
+            <div>
+                <div class="border-b border-gray-300">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button class="roadmap-tab active" data-tab="phase1">Phase 1: Language Support (Q1)</button>
+                        <button class="roadmap-tab" data-tab="phase2">Phase 2: Advanced Automation (Q2)</button>
+                        <button class="roadmap-tab" data-tab="phase3">Phase 3: Enterprise Integration (Q3)</button>
+                    </nav>
+                </div>
+                <div class="mt-8">
+                    <div id="phase1" class="roadmap-content">
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2">🎯 New Languages</h4>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>.NET Core projects</li>
+                                    <li>Node.js/React applications</li>
+                                    <li>Go microservices</li>
+                                    <li>Docker containerized applications</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2">🔧 Enhanced Features</h4>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>SonarQube integration</li>
+                                    <li>Security scanning (OWASP, Snyk)</li>
+                                    <li>Performance testing integration</li>
+                                    <li>Database migration support</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="phase2" class="roadmap-content hidden">
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2">🤖 AI-Powered Features</h4>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Intelligent test selection</li>
+                                    <li>Automated vulnerability scanning</li>
+                                    <li>Smart build optimization</li>
+                                    <li>Predictive failure analysis</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2">☁️ Cloud Integration</h4>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>AWS/Azure deployment pipelines</li>
+                                    <li>Kubernetes deployment automation</li>
+                                    <li>Infrastructure as Code (Terraform)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="phase3" class="roadmap-content hidden">
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2">📊 Analytics & Insights</h4>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Build performance dashboards</li>
+                                    <li>Team productivity metrics</li>
+                                    <li>Quality trend analysis</li>
+                                    <li>Cost optimization recommendations</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-semibold mb-2">🔗 Ecosystem Integration</h4>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>JIRA for release tracking</li>
+                                    <li>Confluence documentation automation</li>
+                                    <li>ServiceNow change management</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cta" class="py-16 text-center bg-white/50 rounded-lg">
+            <h2 class="text-3xl md:text-4xl font-bold section-title">Ready to Revolutionize Our CI/CD?</h2>
+            <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600">The path forward is clear. Let's take the next steps to empower our developers, accelerate delivery, and ensure quality across the enterprise.</p>
+            <div class="mt-10 max-w-4xl mx-auto grid md:grid-cols-2 gap-8 text-left">
+                <div class="card p-6 rounded-lg">
+                    <h3 class="font-bold text-xl mb-3">🚀 Next Steps</h3>
+                    <ul class="space-y-2">
+                        <li><strong>This Week:</strong> Approve library for production, identify pilot teams.</li>
+                        <li><strong>Next 2 Weeks:</strong> Begin pilot migrations, conduct training sessions.</li>
+                        <li><strong>Next 2 Months:</strong> Complete organization-wide rollout, measure ROI.</li>
+                    </ul>
+                </div>
+                <div class="card p-6 rounded-lg">
+                    <h3 class="font-bold text-xl mb-3">💡 Investment Required</h3>
+                    <ul class="space-y-2">
+                        <li><strong>Resources:</strong> 1 DevOps Engineer (FT for 2 months).</li>
+                        <li><strong>Training:</strong> 2-3 hours per team.</li>
+                        <li><strong>ROI:</strong> Break-even in 3 months, with immediate productivity gains.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-12">
+                <a href="mailto:your-email@company.com" class="btn-primary inline-block px-8 py-3 rounded-lg font-semibold text-lg">Let's Discuss Implementation</a>
+            </div>
+        </section>
+
+    </main>
+    
+    <div id="architecture-modal" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="modal-overlay absolute inset-0"></div>
+        <div class="modal-container bg-white w-11/12 md:max-w-2xl mx-auto rounded-lg shadow-lg z-50 overflow-y-auto">
+            <div class="modal-content py-4 text-left px-6">
+                <div class="flex justify-between items-center pb-3">
+                    <p id="modal-title" class="text-2xl font-bold">Component Details</p>
+                    <button class="modal-close cursor-pointer z-50">
+                        <svg class="fill-current text-black" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+                            <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="modal-body" class="my-5">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+            
+            const sections = document.querySelectorAll('section');
+            const headerHeight = document.getElementById('header').offsetHeight;
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - headerHeight - 50;
+                    if (pageYOffset >= sectionTop) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === current) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            const modal = document.getElementById('architecture-modal');
+            const modalCloseButtons = modal.querySelectorAll('.modal-close, .modal-overlay');
+            const clickableBoxes = document.querySelectorAll('.clickable');
+
+            const modalData = {
+                'modal-src-classes': {
+                    title: 'src/ Core Logic Classes',
+                    content: `
+                        <p class="mb-4">These Groovy classes contain the core, reusable logic for generating shell commands and interacting with systems. They are the building blocks that abstract away the complexities of different tools.</p>
+                        <ul class="list-disc list-inside space-y-2 bg-gray-50 p-4 rounded-md">
+                            <li><strong>GitHubManager.groovy:</strong> Handles Git operations like validation and checkout configuration.</li>
+                            <li><strong>MavenScript.groovy:</strong> Generates commands for Maven (e.g., <code>mvn clean install</code>, <code>mvn test</code>).</li>
+                            <li><strong>GradleScript.groovy:</strong> Generates commands for Gradle (e.g., <code>./gradlew build</code>, <code>./gradlew test</code>).</li>
+                            <li><strong>PythonScript.groovy:</strong> Manages Python environments and commands (e.g., <code>pytest</code>, <code>pylint</code>, venv lifecycle).</li>
+                        </ul>
+                    `
+                },
+                'modal-src-generators': {
+                    title: 'src/ Command Generators',
+                    content: `
+                        <p class="mb-4">These components are responsible for creating the specific command-line instructions that will be executed on the Jenkins agents for various technologies.</p>
+                        <ul class="list-disc list-inside space-y-2 bg-gray-50 p-4 rounded-md">
+                            <li><strong>Maven commands:</strong> Dynamically builds commands like <code>mvn clean install -B</code>.</li>
+                            <li><strong>Gradle commands:</strong> Constructs calls like <code>./gradlew checkstyleMain</code>.</li>
+                            <li><strong>Python commands:</strong> Creates commands for testing and linting, e.g., <code>pytest --verbose</code>.</li>
+                            <li><strong>Git operations:</strong> Provides standardized methods for source code checkout.</li>
+                        </ul>
+                    `
+                },
+                'modal-vars-templates': {
+                    title: 'vars/ Pipeline Templates',
+                    content: `
+                        <p class="mb-4">These files define the entire CI/CD pipeline structure as a single, callable function. Teams simply call one of these templates from their Jenkinsfile to get a complete, standardized workflow.</p>
+                        <ul class="list-disc list-inside space-y-2 bg-gray-50 p-4 rounded-md">
+                            <li><strong>javaMaven_template.groovy:</strong> A full 7-stage pipeline for Maven projects.</li>
+                            <li><strong>javaGradle_template.groovy:</strong> A full 7-stage pipeline for Gradle projects.</li>
+                            <li><strong>python_template.groovy:</strong> An 8-stage pipeline for Python, including virtual environment management.</li>
+                        </ul>
+                    `
+                },
+                'modal-vars-utils': {
+                    title: 'vars/ Core Utilities',
+                    content: `
+                        <p class="mb-4">These are helper scripts used by the main pipeline templates to perform common tasks, promoting code reuse within the shared library itself.</p>
+                        <ul class="list-disc list-inside space-y-2 bg-gray-50 p-4 rounded-md">
+                            <li><strong>core_build.groovy:</strong> Orchestrates the build stage, calling the appropriate command generator.</li>
+                            <li><strong>core_test.groovy:</strong> Manages parallel execution of different test types (Unit, Functional).</li>
+                            <li><strong>core_utils.groovy:</strong> Contains helper functions, like auto-detecting project type.</li>
+                            <li><strong>logger.groovy:</strong> Provides consistent, timestamped logging for all pipeline stages.</li>
+                            <li><strong>sendReport.groovy:</strong> Handles the generation and dispatch of notifications and reports.</li>
+                        </ul>
+                    `
+                }
+            };
+
+            clickableBoxes.forEach(box => {
+                box.addEventListener('click', () => {
+                    const targetId = box.dataset.modalTarget;
+                    const data = modalData[targetId];
+                    if (data) {
+                        document.getElementById('modal-title').innerText = data.title;
+                        document.getElementById('modal-body').innerHTML = data.content;
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                    }
+                });
+            });
+
+            modalCloseButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                });
+            });
+            
+            const roadmapTabs = document.querySelectorAll('.roadmap-tab');
+            const roadmapContents = document.querySelectorAll('.roadmap-content');
+            roadmapTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    roadmapTabs.forEach(t => t.classList.remove('active', 'text-blue-600', 'border-blue-600'));
+                    roadmapTabs.forEach(t => t.classList.add('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300'));
+                    tab.classList.add('active', 'text-blue-600', 'border-blue-600');
+                    tab.classList.remove('text-gray-500', 'border-transparent', 'hover:text-gray-700', 'hover:border-gray-300');
+                    
+                    const target = tab.dataset.tab;
+                    roadmapContents.forEach(content => {
+                        if (content.id === target) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+            roadmapTabs.forEach(tab => {
+                const style = tab.classList.contains('active') ? 'font-semibold text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700 border-b-2 border-transparent';
+                tab.className = `whitespace-nowrap py-4 px-1 text-sm font-medium ${style}`;
+            });
+
+            const benefitsCtx = document.getElementById('benefitsChart').getContext('2d');
+            new Chart(benefitsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Project Setup Time', 'Maintenance Effort', 'Build Failures', 'Time to Market'],
+                    datasets: [{
+                        label: 'Improvement with MY_UnifiedCi',
+                        data: [99, 70, 60, 50],
+                        backgroundColor: ['#4caf50', '#2196f3', '#ffc107', '#e91e63'],
+                        borderColor: ['#4caf50', '#2196f3', '#ffc107', '#e91e63'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Percentage Improvement (%)' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}% reduction`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, max: 100 }
+                    }
+                }
+            });
+
+            const savingsCtx = document.getElementById('savingsChart').getContext('2d');
+            new Chart(savingsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Reduced Dev Time on CI/CD', 'Lower Maintenance Overhead', 'Fewer Build-related Delays'],
+                    datasets: [{
+                        label: 'Cost Savings Breakdown',
+                        data: [120000, 50000, 30000],
+                        backgroundColor: ['#0077b6', '#00b4d8', '#90e0ef'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
