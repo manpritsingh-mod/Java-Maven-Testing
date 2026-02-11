@@ -48,11 +48,11 @@ pipeline {
             steps {
                 checkout scm
 
-                // ============ UBUNTU/LINUX ============
-                sh 'python3 --version'
+                // ============ WINDOWS ============
+                bat 'python --version'
                 
-                // ============ WINDOWS (commented) ============
-                // bat 'python --version'
+                // ============ UBUNTU/LINUX (commented) ============
+                // sh 'python3 --version'
 
                 script {
                     logger.info("═══ STAGE: ML NODE SELECTION ═══")
