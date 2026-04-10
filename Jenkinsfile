@@ -9,6 +9,7 @@ pipeline {
     tools {
         // jdk 'jdk-17'
         maven 'mvn-3.9'
+    }
 
     stages {
         stage('Checkout') {
