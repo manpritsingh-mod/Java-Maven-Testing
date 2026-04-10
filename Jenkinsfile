@@ -6,7 +6,7 @@ pipeline {
     }
 
     tools {
-        jdk 'jdk-17'
+        jdk 'jdk-9'
         maven 'mvn-3.9'
         "jenkins.plugins.shiningpanda.tools.PythonInstallation" 'python-3.10'
     }
