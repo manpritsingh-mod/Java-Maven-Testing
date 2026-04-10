@@ -9,7 +9,6 @@ pipeline {
     tools {
         // jdk 'jdk-17'
         maven 'mvn-3.9'
-    }
 
     stages {
         stage('Checkout') {
@@ -52,7 +51,7 @@ pipeline {
                     export PATH="$HOME/.local/bin:$PATH"
                     
                     echo "Bootstrapping Python 3.10 user-space environment..."
-                    uv venv .venv --python 3.10
+                    uv venv .venv --python 3.10 --clear
                     
                     echo "Installing SDK..."
                     . .venv/bin/activate
