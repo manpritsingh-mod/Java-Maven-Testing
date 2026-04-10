@@ -3,8 +3,9 @@ pipeline {
 
     environment {
         MCT_ENABLE_SMOKE = 'false'
-        JAVA_HOME = tool('jdk-9')
+        JAVA_HOME = '/opt/java/openjdk'  
     }
+
 
     tools {
         jdk 'jdk-9'
